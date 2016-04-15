@@ -1,21 +1,34 @@
 # Makefile
 
-OBJS	=	lex.o main.o
-CC		=	gcc
-RM		= 	rm
+OBJS	=	bison.o lex.o main.o
+CC		=	g++
+RM		= del
+CP    = copy
+CFLAGS	= -g -Wall -ansi -pedantic
 
 vba:	$(OBJS)
-		$(CC) $(OBJS) -o vbashell
+		$(CC) $(CFLAGS) $(OBJS) -o vbashell
 
 lex.o:	lex.c
-		$(CC) -c lex.c -o lex.o
+		$(CC) $(CFLAGS) -c lex.c -o lex.o
 
 lex.c:	vba.lex
 		flex vba.lex
-		xcopy lex.yy.c lex.c /-I
+		cmd /C "$(CP) lex.yy.c lex.c"
+
+bison.o: bison.c
+	$(CC) $(CFLAGS) -c bison.c -o bison.o
+
+bison.c:	vba.y
+		bison -d -v vba.y
+		cmd /C "$(CP) vba.tab.c bison.c"
+		fc vba.tab.h tok.h || $(CP) vba.tab.h tok.h
 
 main.o:	main.c
-		$(CC) -c main.c -o main.o
+		$(CC) $(CFLAGS) -c main.c -o main.o
 
-clean:         
-	$(RM) lex.c lex.o lex.yy.c main.o vbashell.exe
+lex.o yac.o main.o	: heading.h
+lex.o main.o		: tok.h
+
+clean:
+	 cmd /C "$(RM) *.o *~ lex.c lex.o lex.yy.c vba.output tok.h vba.tab.c vba.tab.h main.o vbashell.exe"
