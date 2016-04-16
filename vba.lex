@@ -251,8 +251,6 @@ toProper .
 
 %%
     /*** Rules sections ***/
-[ \t\n]         ;
-		/*** Max Code ***/
 \"      string_buf_ptr = string_buf; BEGIN(str);
      
 <str>\"	{	/* saw closing quote - all done */
@@ -302,8 +300,6 @@ toProper .
                          *string_buf_ptr++ = *yptr++;
                  }
 		/***Max's Code***/
-{whitespace} {}
-{toProper}  {}
 
 {Token} { return TOKEN; }
 
@@ -699,7 +695,7 @@ toProper .
 
 {Ast} { return Ast; }
 
-{Plus} {  return Plus;  }
+{Plus} { yylval.c = yytext[0];  return Plus;  }
 
 {Score} { return Score; }
 
@@ -735,18 +731,18 @@ toProper .
 
 {DBCSWhitespace} { return DBCSWhitespace; }
 
-{CR} { return CR; }
+{CR} { yylineno++; return CR; }
 
-{Control} { return Control; }
+{Control} { yylineno++; return Control; }
 
 {LS} { return LS; }
 
 {PS} { return PS; }
-{integerliteral} { yylval.d = atoi(yytext); return IntegerLiteral;}
-
-[ \t]		{}
-[\n]		{ yylineno++;}
-.		{ std::cerr << "SCANNER "; yyerror(""); exit(1);	}
+{integerliteral} { 
+	yylval.d = atoi(yytext); return IntegerLiteral;
+}
+[\n]      { yylineno++; return Control;}
+[ \t]     { }
+.		{ yyerror("Unexpected character");}
 
 %%
-    /*** C Code section ***/

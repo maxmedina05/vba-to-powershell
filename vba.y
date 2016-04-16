@@ -3,6 +3,8 @@
   #include "heading.h"
   int yyerror(char *s);
   int yylex(void);
+  extern FILE *yyout;
+  extern int yylineno; /* from lexer */
 %}
 
 %union {
@@ -281,7 +283,7 @@
 ProceduralModule : ProceduralModuleHeader EOS ProceduralModuleBody
 ;
 
-ClassModule : ClassModuleHeader ClassModuleBody
+ClassModule : ClassModuleHeader ClassModuleBody {fprintf(stderr, "Variable global\n");}
 ;
 
 ProceduralModuleHeader : Attribute VB_Name Equal QuotedIdentifier EOL
@@ -434,17 +436,17 @@ ModuleVariableDeclaration : PublicVariableDeclaration
 | PrivateVariableDeclaration
 ;
 
-GlobalVariableDeclaration : Global VariableDeclarationList {fprintf(yyout, "Variable global\n");}
+GlobalVariableDeclaration : Global VariableDeclarationList { fprintf(yyout, "Variable global\n");}
 ;
 
-PublicVariableDeclaration : Public ModuleVariableDeclarationList {fprintf(yyout, "Variable publica\n");}
-| Public Shared ModuleVariableDeclarationList {fprintf(yyout, "Variable publica\n");}
+PublicVariableDeclaration : Public ModuleVariableDeclarationList {}
+| Public Shared ModuleVariableDeclarationList {}
 ;
 
-PrivateVariableDeclaration : Private ModuleVariableDeclarationList {fprintf(yyout, "Variable privada\n");}
-| Dim ModuleVariableDeclarationList {fprintf(yyout, "Variable privada\n");}
-| Private Shared ModuleVariableDeclarationList {fprintf(yyout, "Variable privada\n");}
-| Dim Shared ModuleVariableDeclarationList {fprintf(yyout, "Variable privada\n");}
+PrivateVariableDeclaration : Private ModuleVariableDeclarationList {}
+| Dim ModuleVariableDeclarationList {}
+| Private Shared ModuleVariableDeclarationList {}
+| Dim Shared ModuleVariableDeclarationList {}
 ;
 
 ModuleVariableDeclarationList : WithEventsVariableDcl Comma WithEventsVariableDcl  
@@ -974,7 +976,7 @@ BlockStatement : StatementLabelDefinition
 ;
 
 Statement : ControlStatement 
-| DataManipulationStatement 
+| DataManipulationStatement {fprintf(stderr, "Declaracion de variable local\t");}
 | ErrorHandlingStatement 
 | FileStatement
 ;
@@ -1559,18 +1561,21 @@ GetStatement : Get FileNumber Comma Variable
 Variable : VariableExpression
 ;
 
-FinalExpression: Expression { }
+FinalExpression: Expression {
+ fprintf(yyout, "%s\n", $1); 
+ //free($1);
+}
 ;
 
-Expression : ValueExpression {}
+Expression : ValueExpression {$$ = $1;}
 | LExpression
 ;
 
-ValueExpression : LiteralExpression {}
+ValueExpression : LiteralExpression { $$ = $1;}
 | ParenthesizedExpression 
 | TypeofIsExpression 
 | NewExpression 
-| OperatorExpression {}
+| OperatorExpression { $$ = $1;}
 ;
 
 LExpression : SimpleNameExpression 
@@ -1581,9 +1586,10 @@ LExpression : SimpleNameExpression
 | WithExpression
 ;
 
-LiteralExpression : INTEGER 
-{ 
-}
+LiteralExpression : INTEGER {
+  char *str = (char*)malloc( 11*sizeof(int));
+  $$ = itoa($1, str, 10);
+ }
 | FLOAT 
 | DATE 
 | STRING 
@@ -1600,7 +1606,9 @@ TypeofIsExpression : Typeof Expression Is TypeExpression
 NewExpression : New TypeExpression
 ;
 
-OperatorExpression : ArithmeticOperator { }
+OperatorExpression : ArithmeticOperator { $$ = $1; 
+  //fprintf(stderr,"%s", $1);
+}
 | ConcatenationOperator 
 | RelationalOperator 
 | LikeOperator 
@@ -1608,29 +1616,38 @@ OperatorExpression : ArithmeticOperator { }
 | LogicalOperator
 ;
 
-ArithmeticOperator : UnaryMinusOperator {}
-| AdditionOperator { }
-| SubtractionOperator {}
-| MultiplicationOperator {}
-| DivisionOperator {}
-| IntegerDivisionOperator {}
-| ModuloOperator {}
-| ExponentiationOperator {}
+ArithmeticOperator : UnaryMinusOperator { $$ = $1;}
+| AdditionOperator {$$ = $1; }
+| SubtractionOperator {$$ = $1;}
+| MultiplicationOperator {$$ = $1;}
+| DivisionOperator {$$ = $1;}
+| IntegerDivisionOperator {$$ = $1;}
+| ModuloOperator {$$ = $1;}
+| ExponentiationOperator {$$ = $1;}
 ;
 
-UnaryMinusOperator : Score Expression { }
+UnaryMinusOperator : Score Expression {}
 ;
 
-AdditionOperator : Expression Plus Expression {}
+AdditionOperator : Expression Plus Expression { 
+  //fprintf(yyout, "%s", stringBuilder(3, $1, "+", $3).c_str());
+  $$ = (char*)stringBuilder(3, $1, "+", $3).c_str();
+}
 ;
 
-SubtractionOperator : Expression Score Expression {}
+SubtractionOperator : Expression Score Expression {
+    $$ = (char*)stringBuilder(3, $1, "-", $3).c_str();
+}
 ;
 
-MultiplicationOperator : Expression Ast Expression {}
+MultiplicationOperator : Expression Ast Expression {
+    $$ = (char*)stringBuilder(3, $1, "*", $3).c_str();
+}
 ;
 
-DivisionOperator : Expression Slash Expression { }
+DivisionOperator : Expression Slash Expression {
+  $$ = (char*)stringBuilder(3, $1, "/", $3).c_str();
+ }
 ;
 
 IntegerDivisionOperator : Expression Back_Slash Expression { 
@@ -2120,6 +2137,6 @@ ExpVar : Expression
 IdenVar : Identifier
 ;
 
-INTEGER : IntegerLiteral {$$ = $1;}
+INTEGER : IntegerLiteral { $$ = $1;}
 ;
 %%

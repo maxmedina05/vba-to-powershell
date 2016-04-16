@@ -1,15 +1,15 @@
 # Makefile
 
-OBJS	=	bison.o lex.o main.o
+OBJS	=	pscodegen.o bison.o lex.o main.o
 CC		=	g++
 RM		= del
 CP    = copy
-CFLAGS	= -g -Wall -ansi -pedantic
+CFLAGS	= -g -Wall -ansi -pedantic -w
 
 vba:	$(OBJS)
 		$(CC) $(CFLAGS) $(OBJS) -o VBA2PSM1
 
-lex.o:	lex.c
+lex.o: lex.c
 		$(CC) $(CFLAGS) -c lex.c -o lex.o
 
 lex.c:	vba.lex
@@ -19,7 +19,7 @@ lex.c:	vba.lex
 bison.o: bison.c
 	$(CC) $(CFLAGS) -c bison.c -o bison.o
 
-bison.c:	vba.y
+bison.c: vba.y
 		bison -d -v vba.y
 		cmd /C "$(CP) vba.tab.c bison.c"
 		fc vba.tab.h tok.h || $(CP) vba.tab.h tok.h
@@ -29,6 +29,9 @@ main.o:	main.c
 
 lex.o yac.o main.o	: heading.h
 lex.o main.o		: tok.h
+
+pscodegen.o:	pscodegen.h pscodegen.c
+		$(CC) $(CFLAGS) -c pscodegen.c -o pscodegen.o
 
 clean:
 	 cmd /C "$(RM) *.o *~ lex.c lex.o bison.c lex.yy.c vba.output tok.h vba.tab.c vba.tab.h main.o vbashell.exe"
