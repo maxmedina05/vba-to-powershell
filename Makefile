@@ -7,7 +7,7 @@ CP    = copy
 CFLAGS	= -g -Wall -ansi -pedantic
 
 vba:	$(OBJS)
-		$(CC) $(CFLAGS) $(OBJS) -o vbashell
+		$(CC) $(CFLAGS) $(OBJS) -o VBA2PSM1
 
 lex.o:	lex.c
 		$(CC) $(CFLAGS) -c lex.c -o lex.o
@@ -31,4 +31,4 @@ lex.o yac.o main.o	: heading.h
 lex.o main.o		: tok.h
 
 clean:
-	 cmd /C "$(RM) *.o *~ lex.c lex.o lex.yy.c vba.output tok.h vba.tab.c vba.tab.h main.o vbashell.exe"
+	 cmd /C "$(RM) *.o *~ lex.c lex.o bison.c lex.yy.c vba.output tok.h vba.tab.c vba.tab.h main.o vbashell.exe"
