@@ -25,14 +25,13 @@ extern FILE *yyout;
 %token <i> INTEGER
 %token <f> FLOAT
 %token <s> STRING
-%token EOL
+%token <s> EOL
 
 	/*** VBA Tokens ***/
 %token DIM
 %token MODULE
-%token ENDMODULE
+%token END
 %token SUB
-%token ENDSUB
 %token <s> NAME
 
 %left MINUS PLUS EQUAL
@@ -47,23 +46,23 @@ extern FILE *yyout;
 %%
 
 input :		/*		empty		*/
-| subroutine_definition EOL
-| input subroutine_definition EOL
 | module_declaration EOL
 | input module_declaration EOL
 | statement EOL { fprintf(yyout, "%s\n", $1); }
 | input statement EOL { fprintf(yyout, "%s\n", $2); }
 ;
 
-module_declaration: MODULE NAME EOL subroutine_definition EOL ENDMODULE {
-	fprintf(stderr, "He encontrado un modulo con sub\n");
-}
-| MODULE NAME EOL ENDMODULE
+module_declaration: MODULE NAME EOL END MODULE
+| MODULE NAME EOL subroutine_definition EOL END MODULE
+| MODULE NAME EOL END MODULE
 ;
 
-subroutine_definition: SUB NAME EOL ENDSUB { 
-	fprintf(stderr, "found subroutine_definition %s\n", $2);}
+subroutine_definition: SUB NAME EOL END SUB
+| SUB NAME EOL statement_list END SUB
 ;
+
+statement_list: statement EOL
+| statement_list statement EOL
 
 numberlist : NUMBER {}
 | numberlist NUMBER {}

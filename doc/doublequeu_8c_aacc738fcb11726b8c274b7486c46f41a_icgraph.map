@@ -1,0 +1,6 @@
+<map id="newQueu" name="newQueu">
+<area shape="rect" id="node2" href="$generators_8h.html#afb59820d98da8316a70f4535c89333ed" title="Generador de sentencia de suma de los elementos de 2 vectores término a término. " alt="" coords="155,5,241,32"/>
+<area shape="rect" id="node3" href="$init_vector_test_8c.html#a31aa7ec3adef41d4358f65f059a31b18" title="Convierte un arreglo de double en una cola de double. " alt="" coords="155,56,241,83"/>
+<area shape="rect" id="node5" href="$read_vector_elements_8c.html#aa429f75ef62570ec1810c3f0361ea2f7" title="Generador de lectura de un vector por consola. " alt="" coords="129,107,267,133"/>
+<area shape="rect" id="node4" href="$init_vector_test_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="Punto de entrada de la aplicación de prueba. " alt="" coords="315,56,365,83"/>
+</map>

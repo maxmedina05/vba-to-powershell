@@ -1,0 +1,19 @@
+<map id="generators.h" name="generators.h">
+<area shape="rect" id="node2" href="$add_vectors_8c.html" title="Realización de la función addVectors. " alt="" coords="5,80,101,107"/>
+<area shape="rect" id="node3" href="$card_vector_elements_8c.html" title="Realización de la función cardVectorElements. " alt="" coords="125,80,272,107"/>
+<area shape="rect" id="node4" href="$doublequeu_8c.html" title="Realización de las funciones de cola de double. " alt="" coords="296,80,395,107"/>
+<area shape="rect" id="node5" href="$pscodegen_8h.html" title="pscodegen.h" alt="" coords="470,80,565,107"/>
+<area shape="rect" id="node7" href="$main_8c.html" title="Fuente de la parte principal del compilador Vba &#45;&gt; PowerShell. " alt="" coords="349,229,409,256"/>
+<area shape="rect" id="node9" href="$vba2psm_8lex_8c.html" title="vba2psm.lex.c" alt="" coords="551,229,654,256"/>
+<area shape="rect" id="node10" href="$vba2psm_8tab_8c.html" title="vba2psm.tab.c" alt="" coords="678,229,783,256"/>
+<area shape="rect" id="node11" href="$init_vector_8c.html" title="Fuente de la realización de la función initVector. " alt="" coords="691,80,778,107"/>
+<area shape="rect" id="node12" href="$init_vector_test_8c.html" title="Fuente de la prueba de initVector. " alt="" coords="802,80,913,107"/>
+<area shape="rect" id="node13" href="$print_string_8c.html" title="Realización de la función printString. " alt="" coords="937,80,1029,107"/>
+<area shape="rect" id="node14" href="$print_vector_elements_8c.html" title="Realización de la función printVectorElements. " alt="" coords="1053,80,1200,107"/>
+<area shape="rect" id="node15" href="$read_vector_elements_8c.html" title="Realización de la función readVectorElements. " alt="" coords="1224,80,1371,107"/>
+<area shape="rect" id="node16" href="$_sum_queu_8c.html" title="Realización de la función SumQueu. " alt="" coords="1395,80,1483,107"/>
+<area shape="rect" id="node17" href="$sum_vector_elements_8c.html" title="Realización de la función sumVectorElements. " alt="" coords="1507,80,1653,107"/>
+<area shape="rect" id="node18" href="$tables_8c.html" title="Símbolos globales del compilador. " alt="" coords="1677,80,1744,107"/>
+<area shape="rect" id="node6" href="$heading_8h.html" title="heading.h" alt="" coords="478,155,557,181"/>
+<area shape="rect" id="node8" href="$pscodegen_8c.html" title="pscodegen.c" alt="" coords="433,229,527,256"/>
+</map>

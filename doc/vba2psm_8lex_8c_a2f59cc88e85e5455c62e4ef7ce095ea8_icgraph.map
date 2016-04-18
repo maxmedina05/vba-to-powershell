@@ -1,0 +1,10 @@
+<map id="yy_flush_buffer" name="yy_flush_buffer">
+<area shape="rect" id="node2" href="$vba2psm_8lex_8c.html#af4a399540c15d953f8b01085bfdc93ea" title="yy_init_buffer" alt="" coords="163,81,261,108"/>
+<area shape="rect" id="node3" href="$vba2psm_8lex_8c.html#ab657ddef65d43cc3ab8dfc2cad0ac5b8" title="Immediately switch to a different input stream. " alt="" coords="476,56,548,83"/>
+<area shape="rect" id="node7" href="$vba2psm_8lex_8c.html#a5bc6f1a5f7812508f425b08283f13ae8" title="Allocate and initialize an input buffer state. " alt="" coords="309,107,428,133"/>
+<area shape="rect" id="node4" href="$vba2psm_8lex_8c.html#a3b3b5f60f720da3f621223997266498c" title="yy_get_next_buffer" alt="" coords="596,5,727,32"/>
+<area shape="rect" id="node6" href="$vba2psm_8lex_8c.html#a171692544b8e065853e387755849a433" title="input" alt="" coords="775,56,826,83"/>
+<area shape="rect" id="node5" href="$vba2psm_8lex_8c.html#a8fdafe3be7e00ce3d4f0cb50a9a5eb39" title="while" alt="" coords="775,5,827,32"/>
+<area shape="rect" id="node8" href="$vba2psm_8lex_8c.html#ad4a65b873df5c05570846b5413b41dfd" title="if" alt="" coords="493,107,531,133"/>
+<area shape="rect" id="node9" href="$vba2psm_8lex_8c.html#a9c46d0a9effdc2638e26871310104f0a" title="yyunput" alt="" coords="628,107,695,133"/>
+</map>

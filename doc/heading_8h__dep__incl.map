@@ -1,0 +1,6 @@
+<map id="heading.h" name="heading.h">
+<area shape="rect" id="node2" href="$main_8c.html" title="Fuente de la parte principal del compilador Vba &#45;&gt; PowerShell. " alt="" coords="5,80,65,107"/>
+<area shape="rect" id="node3" href="$pscodegen_8c.html" title="pscodegen.c" alt="" coords="90,80,183,107"/>
+<area shape="rect" id="node4" href="$vba2psm_8lex_8c.html" title="vba2psm.lex.c" alt="" coords="208,80,311,107"/>
+<area shape="rect" id="node5" href="$vba2psm_8tab_8c.html" title="vba2psm.tab.c" alt="" coords="335,80,440,107"/>
+</map>

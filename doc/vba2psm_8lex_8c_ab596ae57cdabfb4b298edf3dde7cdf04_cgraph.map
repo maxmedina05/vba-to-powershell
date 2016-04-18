@@ -1,0 +1,7 @@
+<map id="yylex_destroy" name="yylex_destroy">
+<area shape="rect" id="node2" href="$vba2psm_8lex_8c.html#ae6ac796aa6c45d433a4b89bf45e6e9dc" title="Destroy the buffer. " alt="" coords="343,31,460,57"/>
+<area shape="rect" id="node3" href="$vba2psm_8lex_8c.html#a70f82d43d4797bb2a50f7678ddbfbda5" title="yyfree" alt="" coords="520,5,577,32"/>
+<area shape="rect" id="node4" href="$vba2psm_8lex_8c.html#a599b60cd059cf60e89cc49953dc708d0" title="yy_init_globals" alt="" coords="165,81,270,108"/>
+<area shape="rect" id="node5" href="$vba2psm_8lex_8c.html#a6201ab6be4687a1ebc3120602d05e35a" title="Removes and deletes the top of the stack, if present. " alt="" coords="152,132,283,159"/>
+<area shape="rect" id="node6" href="$vba2psm_8lex_8c.html#ac6bf96bd2d347c04367b8111abcd0dca" title="yy_load_buffer_state" alt="" coords="331,132,472,159"/>
+</map>

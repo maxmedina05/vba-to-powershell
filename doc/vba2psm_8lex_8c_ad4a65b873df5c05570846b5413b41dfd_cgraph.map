@@ -1,0 +1,9 @@
+<map id="if" name="if">
+<area shape="rect" id="node2" href="$vba2psm_8lex_8c.html#a5bc6f1a5f7812508f425b08283f13ae8" title="Allocate and initialize an input buffer state. " alt="" coords="108,56,227,83"/>
+<area shape="rect" id="node6" href="$vba2psm_8lex_8c.html#ac6bf96bd2d347c04367b8111abcd0dca" title="yy_load_buffer_state" alt="" coords="595,107,736,133"/>
+<area shape="rect" id="node7" href="$vba2psm_8lex_8c.html#a2e9898ec03e594f5a82387c787776ef6" title="yyensure_buffer_stack" alt="" coords="92,107,243,133"/>
+<area shape="rect" id="node3" href="$vba2psm_8lex_8c.html#a7da304d8ef6c688c0835d35296fe61c2" title="yyalloc" alt="" coords="310,56,370,83"/>
+<area shape="rect" id="node4" href="$vba2psm_8lex_8c.html#af4a399540c15d953f8b01085bfdc93ea" title="yy_init_buffer" alt="" coords="291,5,389,32"/>
+<area shape="rect" id="node5" href="$vba2psm_8lex_8c.html#a2f59cc88e85e5455c62e4ef7ce095ea8" title="Discard all buffered characters. " alt="" coords="437,56,547,83"/>
+<area shape="rect" id="node8" href="$vba2psm_8lex_8c.html#abcb4148bc13fe254059384c2fdf472b7" title="yyrealloc" alt="" coords="304,107,376,133"/>
+</map>

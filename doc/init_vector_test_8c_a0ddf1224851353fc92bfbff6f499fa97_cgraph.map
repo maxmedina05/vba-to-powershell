@@ -1,0 +1,7 @@
+<map id="main" name="main">
+<area shape="rect" id="node2" href="$init_vector_test_8c.html#a31aa7ec3adef41d4358f65f059a31b18" title="Convierte un arreglo de double en una cola de double. " alt="" coords="104,56,191,83"/>
+<area shape="rect" id="node5" href="$generators_8h.html#abeabd80dee18a89168082b17854b1edc" title="Generador de sentencia de declaración/asignación de un vector. " alt="" coords="109,107,185,133"/>
+<area shape="rect" id="node3" href="$doublequeu_8c.html#a403784db6f9a0ad2159709a06c788b5a" title="Agrega un double a la cola. " alt="" coords="239,5,333,32"/>
+<area shape="rect" id="node4" href="$doublequeu_8c.html#aacc738fcb11726b8c274b7486c46f41a" title="Crea una cola de double vacía. " alt="" coords="248,56,324,83"/>
+<area shape="rect" id="node6" href="$doublequeu_8c.html#a0fb59dc2f49b381262fdf208bcd55d5c" title="Obtiene longitud de la cola. " alt="" coords="251,107,321,133"/>
+</map>
