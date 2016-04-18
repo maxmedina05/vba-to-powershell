@@ -11,5 +11,3 @@ Module Module1
 End Module
 
 'Codigo en Powershell
-'$s = "White"
-'Write-host $s

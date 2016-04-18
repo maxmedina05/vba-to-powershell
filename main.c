@@ -1,12 +1,14 @@
+/**
+ * @file main.c
+ * @brief Fuente de la parte principal del compilador Vba -> PowerShell
+ */
 #include "heading.h"
+#include "generators.h"
 
-extern int yylineno; /* from lexer */
 extern FILE *yyin;
 extern FILE *yyout;
-
-void yyerror(char *s);
-// prototype of bison-generated parser function
-int yyparse();
+extern int yylex(void);
+void yyparse();
 
 /**
  * Handler del archivo de salida compilado.
@@ -14,7 +16,7 @@ int yyparse();
 static FILE *outH= NULL;
 
 /**
- * Handler del archivo de entrada fuente SISLA.
+ * Handler del archivo de entrada fuente Vba.
  */
 static FILE *inH= NULL;
 
@@ -26,9 +28,8 @@ static FILE *inH= NULL;
  *						de entrada y salida. Si faltan, se asumen la entrada
  *						y salida standard.
  */
-
-int main(int argc, char *argv[]){
-	fprintf(stderr, "Traductor VBA -> PowerShell\n");
+int main(int argc, char *argv[]) {
+	fprintf(stderr, "Compilador VBA -> PowerShell\n");
 	fprintf(stderr, "---------- ----- -- ----------\n\n");
 	switch ( argc ) {
 		case 3:
@@ -56,6 +57,7 @@ int main(int argc, char *argv[]){
 	fprintf(yyout, "# El Codigo Fuente es: %s\n", argv[1]);
 	fflush(yyout);
 	yyparse();
+	// yylex();
 	fprintf(stderr, "Fuente compilada generada...\n");
 	if ( NULL != inH )
 		fclose(inH);
@@ -63,10 +65,4 @@ int main(int argc, char *argv[]){
 		fclose(outH);
 
 	return EXIT_SUCCESS;
-}
-
-void yyerror(char *s) {
-	fprintf(stderr, "parse error on line %d! Mesage: %s\n",yylineno, s);
-	// might as well halt now:
-	exit(-1);
 }

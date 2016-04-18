@@ -1,37 +1,87 @@
-# Makefile
+# Makefile compilador Vba -> PowerShell
+# Se ajustaron las reglas de construccion, que originalmente suponian
+# la presencia algun tipo de port Windows de comandos habituales
+# en unix/linux.
+# Desde: 3/14/2016 8:33:40 PM
 
-OBJS	=	pscodegen.o bison.o lex.o main.o
-CC		=	g++
-RM		= del
-CP    = copy
-CFLAGS	= -g -Wall -ansi -pedantic -w
+# Regla de compilacion de los objetos C.
+%.o : %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+CC = g++
+CFLAGS	= -g -Wall -ansi -pedantic
+FLEX = C:\Dev\win_flex_bison\flex.exe
+BISON = C:\Dev\win_flex_bison\bison.exe
 
-vba:	$(OBJS)
-		$(CC) $(CFLAGS) $(OBJS) -o VBA2PSM1
+SRCS = generators.h initVector.c tables.c doublequeu.c \
+		sumVectorElements.c SumQueu.c cardVectorElements.c printVectorElements.c \
+		printString.c readVectorElements.c addVectors.c
+		
+OBJS = pscodegen.o initVector.o tables.o vba2psm.lex.o vba2psm.tab.o \
+		doublequeu.o sumVectorElements.o SumQueu.o cardVectorElements.o printVectorElements.o \
+		printString.o readVectorElements.o addVectors.o
+EXES = vba2psm.exe
 
-lex.o: lex.c
-		$(CC) $(CFLAGS) -c lex.c -o lex.o
+tables.o : tables.c
 
-lex.c:	vba.lex
-		flex vba.lex
-		cmd /C "$(CP) lex.yy.c lex.c"
+SumQueu.o : generators.h SumQueu.c
 
-bison.o: bison.c
-	$(CC) $(CFLAGS) -c bison.c -o bison.o
+printVectorElements.o : generators.h printVectorElements.c
 
-bison.c: vba.y
-		bison -d -v vba.y
-		cmd /C "$(CP) vba.tab.c bison.c"
-		fc vba.tab.h tok.h || $(CP) vba.tab.h tok.h
+readVectorElements.o : generators.h readVectorElements.c
 
-main.o:	main.c
-		$(CC) $(CFLAGS) -c main.c -o main.o
+printString.o : generators.h printString.c
 
-lex.o yac.o main.o	: heading.h
-lex.o main.o		: tok.h
+sumVectorElements.o : generators.h sumVectorElements.c
+
+cardVectorElements.o : generators.h cardVectorElements.c
+
+doublequeu.o : generators.h doublequeu.c
+
+initVector.o : generators.h initVector.c
+
+addVectors.o : addVectors.c
+
+# Construccion del compilador
+vba2psm.tab.h vba2psm.tab.c : vba2psm.y
+	$(BISON) -d vba2psm.y --graph=vba2psm.gv
+
+vba2psm.jpg : vba2psm.gv
+	dot -Tjpg vba2psm.gv -o vba2psm.jpg
+
+vba2psm.lex.c : vba2psm.l vba2psm.tab.h
+	$(FLEX) -o vba2psm.lex.c vba2psm.l
+
+vba2psm.lex.o : vba2psm.lex.c
+
+main.o : main.c
 
 pscodegen.o:	pscodegen.h pscodegen.c
 		$(CC) $(CFLAGS) -c pscodegen.c -o pscodegen.o
 
-clean:
-	 cmd /C "$(RM) *.o *~ lex.c lex.o bison.c lex.yy.c vba.output tok.h vba.tab.c vba.tab.h main.o vbashell.exe"
+vba2psm.exe : pscodegen.o main.o vba2psm.tab.o vba2psm.lex.o vba2psm.a
+	$(CC) $(CFLAGS) -o vba2psm.exe main.o vba2psm.lex.o vba2psm.tab.o pscodegen.o -L. vba2psm.a
+
+# Biblioteca de soporte del proyecto 3/27/2015 12:58:25 PM
+vba2psm.a : initVector.o tables.o doublequeu.o sumVectorElements.o \
+				SumQueu.o cardVectorElements.o printVectorElements.o \
+				printString.o readVectorElements.o addVectors.o
+	ar -r vba2psm.a $?
+
+objs : $(OBJS) vba2psm.a
+
+exes : $(EXES)
+
+# Regla modificada. Ver inicio.
+doc/index.html : $(SRCS) Doxyfile
+	if exist .\doc cmd /C "rd /S /Q .\doc"
+	doxygen Doxyfile
+
+# Inconsistencia corregida en la linea siguiente.
+docs : doc/index.html
+
+# Regla modificada. Ver inicio.
+clean :
+	cmd /C "del $(OBJS) $(EXES) vba2psm.a vba2psm.tab.h vba2psm.tab.c vba2psm.lex.c main.o"
+	if exist .\doc cmd /C "rd /S /Q .\doc"
+
+all : exes docs vba2psm.jpg
