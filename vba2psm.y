@@ -46,31 +46,28 @@ extern FILE *yyout;
 %%
 
 input :		/*		empty		*/
-| module_declaration EOL
-| input module_declaration EOL
-| statement EOL { fprintf(yyout, "%s\n", $1); }
-| input statement EOL { fprintf(yyout, "%s\n", $2); }
+| module_declaration
+| input module_declaration
 ;
 
-module_declaration: MODULE NAME EOL END MODULE
-| MODULE NAME EOL subroutine_definition EOL END MODULE
-| MODULE NAME EOL END MODULE
+module_declaration: MODULE NAME END MODULE
+| MODULE NAME subroutine_definition END MODULE
+| MODULE NAME END MODULE
 ;
 
-subroutine_definition: SUB NAME EOL END SUB
-| SUB NAME EOL statement_list END SUB
+subroutine_definition: SUB NAME END SUB
+| SUB NAME statement END SUB
 ;
 
-statement_list: statement EOL
-| statement_list statement EOL
+statement_list: statement
+| statement_list statement
 
 numberlist : NUMBER {}
 | numberlist NUMBER {}
 ;
 
-statement : NAME numberlist {}
-|	expression {$$ = $1;}
-| variable_declaration {$$ = $1;}
+statement : expression {$$ = $1; fprintf(yyout, "%s\n", $1);}
+| variable_declaration {$$ = $1; fprintf(yyout, "%s\n", $1);}
 ;
 
 variable_declaration: DIM variable_name EQUAL expression {
@@ -102,8 +99,6 @@ assignment_expression: EQUAL expression {
 variable_name: NAME { $$ = $1;}
 ;
 
-EOF: EOL
-;
 
 %start input
 ;

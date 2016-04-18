@@ -813,7 +813,7 @@ YY_RULE_SETUP
 case 4:
 YY_RULE_SETUP
 #line 28 "vba2psm.l"
-{ yylval.s = yytext;}
+{ yylval.s = yytext; return DIM;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
@@ -857,9 +857,9 @@ case 13:
 YY_RULE_SETUP
 #line 37 "vba2psm.l"
 { 
-					yylval.s = "EOL";
+					//yylval.s = "EOL";
  					yylineno++; line_num++; 
- 					return EOL;
+ 					//return EOL;
  				}
 	YY_BREAK
 case 14:

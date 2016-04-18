@@ -22,10 +22,10 @@ Name [a-zA-Z_]+
 %x str
 
 %%
-"Module"   { yylval.s = yytext; return MODULE;}
+"Module"	{ yylval.s = yytext; return MODULE;}
 "Sub"   { yylval.s = yytext; return SUB;}
 "End"		{ yylval.s = yytext; return END;}
-"Dim"   { yylval.s = yytext;}
+"Dim"   { yylval.s = yytext; return DIM;}
 {Name}  {yylval.s = yytext; return NAME;}
 [-+]?[0-9]+"."[0-9]*{EXP}? |
 "."?[0-9]+{EXP}? { yylval.d = atof(yytext); return NUMBER; }
@@ -35,9 +35,9 @@ Name [a-zA-Z_]+
 "*"     { yylval.s = yytext; return AST; }
 "/"     { yylval.s = yytext; return SLASH; }
 "\n"    { 
-					yylval.s = "EOL";
+					//yylval.s = "EOL";
  					yylineno++; line_num++; 
- 					return EOL;
+ 					//return EOL;
  				}
 [ \t]   { }
 .       { fprintf(
