@@ -56,6 +56,7 @@ int main(int argc, char *argv[]) {
 		yyout= outH;
 	fprintf(yyout, "# El Codigo Fuente es: %s\n", argv[1]);
 	fflush(yyout);
+	fflush(NULL);
 	yyparse();
 	// yylex();
 	fprintf(stderr, "Fuente compilada generada...\n");

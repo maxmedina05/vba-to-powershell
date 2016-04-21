@@ -1,5 +1,0 @@
-<map id="lenQueu" name="lenQueu">
-<area shape="rect" id="node2" href="$generators_8h.html#afb59820d98da8316a70f4535c89333ed" title="Generador de sentencia de suma de los elementos de 2 vectores término a término. " alt="" coords="123,5,209,32"/>
-<area shape="rect" id="node3" href="$init_vector_8c.html#abeabd80dee18a89168082b17854b1edc" title="Generador de sentencia de declaración/asignación de un vector. " alt="" coords="128,56,204,83"/>
-<area shape="rect" id="node4" href="$init_vector_test_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="Punto de entrada de la aplicación de prueba. " alt="" coords="257,56,308,83"/>
-</map>

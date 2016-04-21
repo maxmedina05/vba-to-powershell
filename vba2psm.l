@@ -14,9 +14,9 @@ int yyerror(char *s);
 %}
 
 /* float exponent */
+DIGIT [0-9]
 EXP	([Ee][-+]?[0-9]+)
-VECTORS [a-z]
-Name [a-zA-Z_]+
+ID [a-zA-Z][a-zA-Z0-9_]*
 /* La captura de un token tipo string es compleja. Ver http://flex.sourceforge.net/manual/Start-Conditions.html */
 
 %x str
@@ -26,7 +26,9 @@ Name [a-zA-Z_]+
 "Sub"   { yylval.s = yytext; return SUB;}
 "End"		{ yylval.s = yytext; return END;}
 "Dim"   { yylval.s = yytext; return DIM;}
-{Name}  {yylval.s = yytext; return NAME;}
+"Function"   { yylval.s = yytext; return FUNCTION;}
+"Select"   { yylval.s = yytext; return SELECT;}
+{ID}  {yylval.s = yytext; return IDENTIFIER;}
 [-+]?[0-9]+"."[0-9]*{EXP}? |
 "."?[0-9]+{EXP}? { yylval.d = atof(yytext); return NUMBER; }
 "="     { yylval.s = yytext; return EQUAL; }
@@ -34,6 +36,9 @@ Name [a-zA-Z_]+
 "-"     { yylval.s = yytext; return MINUS; }
 "*"     { yylval.s = yytext; return AST; }
 "/"     { yylval.s = yytext; return SLASH; }
+"("			{	return '('; };
+")"			{	return ')'; };
+
 "\n"    { 
 					//yylval.s = "EOL";
  					yylineno++; line_num++; 

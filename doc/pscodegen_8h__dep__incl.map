@@ -1,7 +1,0 @@
-<map id="pscodegen.h" name="pscodegen.h">
-<area shape="rect" id="node2" href="$heading_8h.html" title="heading.h" alt="" coords="159,80,237,107"/>
-<area shape="rect" id="node3" href="$main_8c.html" title="Fuente de la parte principal del compilador Vba &#45;&gt; PowerShell. " alt="" coords="5,155,65,181"/>
-<area shape="rect" id="node4" href="$pscodegen_8c.html" title="pscodegen.c" alt="" coords="90,155,183,181"/>
-<area shape="rect" id="node5" href="$vba2psm_8lex_8c.html" title="vba2psm.lex.c" alt="" coords="208,155,311,181"/>
-<area shape="rect" id="node6" href="$vba2psm_8tab_8c.html" title="vba2psm.tab.c" alt="" coords="335,155,440,181"/>
-</map>

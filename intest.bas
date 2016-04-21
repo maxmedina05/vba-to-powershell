@@ -1,5 +1,5 @@
 Module Max
-Sub Main
-Dim x = 5
-End Sub
+	Sub main()
+	Dim x
+	End Sub
 End Module

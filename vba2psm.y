@@ -9,6 +9,32 @@ int yyerror(char *s);
 int yylex(void);
 extern int yylineno;
 extern FILE *yyout;
+int errors = 0;
+
+std::map<std::string,std::string> symbolTable;
+
+void install(char* type, char *identifier){
+  std::string idstr(identifier);
+  std::string typestr(type);
+
+  // check if identifier exist
+  if(symbolTable.find(identifier) != symbolTable.end()){
+    symbolTable[identifier] = typestr;
+  }
+  else{
+    errors++;
+    yyerror("Already defined");
+  }
+}
+
+bool contextCheck(char * identifier){
+  std::string idstr(identifier);
+  //std::string typestr(type);
+
+  // check if identifier exist
+  return (symbolTable.find(identifier) != symbolTable.end());
+}
+
 %}
 
  /* Symbols */
@@ -32,14 +58,17 @@ extern FILE *yyout;
 %token MODULE
 %token END
 %token SUB
-%token <s> NAME
+%token FUNCTION
+%token SELECT
+%token CASE
+%token IS
+%token AS
+%token <s> IDENTIFIER
+%token DATATYPE
 
 %left MINUS PLUS EQUAL
 %left	AST SLASH
 %type <s> expression
-%type <s> variable_name
-%type <s> assignment_expression
-%type <s> variable_declaration
 %type <s> statement
 %type <q> numberlist
 
@@ -48,34 +77,56 @@ extern FILE *yyout;
 input :		/*		empty		*/
 | module_declaration
 | input module_declaration
+| subroutine_definition
+| input subroutine_definition
 ;
 
-module_declaration: MODULE NAME END MODULE
-| MODULE NAME subroutine_definition END MODULE
-| MODULE NAME END MODULE
+module_declaration: /* Nothing */
+| MODULE IDENTIFIER subroutine_definition END MODULE
+| MODULE IDENTIFIER statement_list END MODULE
+| MODULE IDENTIFIER END MODULE
 ;
 
-subroutine_definition: SUB NAME END SUB
-| SUB NAME statement END SUB
+subroutine_definition: /* Nothing */
+| SUB IDENTIFIER '(' argument ')' statement_list END SUB
+| SUB IDENTIFIER END SUB
 ;
 
-statement_list: statement
+function_definition: /* Nothing */
+| FUNCTION IDENTIFIER '(' argument ')' statement_list END FUNCTION
+;
+
+statement_list: /* Empty */
+| statement
 | statement_list statement
-
-numberlist : NUMBER {}
-| numberlist NUMBER {}
 ;
 
-statement : expression {$$ = $1; fprintf(yyout, "%s\n", $1);}
-| variable_declaration {$$ = $1; fprintf(yyout, "%s\n", $1);}
+statement : expression {$$ = $1;}
+| variable_declaration
 ;
 
-variable_declaration: DIM variable_name EQUAL expression {
-	sprintf($$, "$%s= %s", $2, $4);
+variable_declaration: DIM IDENTIFIER EQUAL numberlist {
+  //std::string idstr($2);
+  if(contextCheck($2)) {
+    initArray(yyout, 0, $2, $4);
+  }
+  else {
+    initArray(yyout, 0, $2, $4);
+  }
 }
-| DIM variable_name { 
-	{ sprintf($$, "%s", $2); }
+| DIM IDENTIFIER EQUAL expression {
+  //install("Generic", $2);
 }
+| DIM IDENTIFIER { 
+	{ 
+    //sprintf($$, "%s", $2);
+    //install("Generic", $2);
+   }
+}
+;
+
+numberlist : NUMBER { $$= appendQueu(newQueu(), $1); }
+| numberlist NUMBER { $$= appendQueu($1, $2); }
 ;
 
 expression: NUMBER {
@@ -91,21 +142,20 @@ expression: NUMBER {
 	$$ = (char*)stringBuilder(3, $1, "/", $3).c_str(); free($1); free($3);}
 ;
 
-assignment_expression: EQUAL expression { 
-	//$$ = (char*)stringBuilder(2, "= ", $2).c_str();}
-	sprintf($$, " = %s", $2);}
+argument: /* Nothing */
+| DIM IDENTIFIER AS DATATYPE EQUAL expression
+| DIM IDENTIFIER EQUAL expression
+| DIM IDENTIFIER
+| IDENTIFIER EQUAL expression
+| IDENTIFIER
 ;
-
-variable_name: NAME { $$ = $1;}
-;
-
-
 %start input
 ;
 
 %%
 int yyerror(std::string s)
 {
+  errors++;
   extern int line_num;	// defined and maintained in lex.c
   extern char *yytext;	// defined and maintained in lex.c
   
@@ -121,6 +171,7 @@ int yyerror(char *s)
 
 void yyerror(char *s, ...)
 {
+  errors++;
 	extern int line_num;	// defined and maintained in lex.c
   va_list ap;
   va_start(ap, s);

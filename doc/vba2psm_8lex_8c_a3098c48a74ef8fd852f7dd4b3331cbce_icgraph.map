@@ -1,5 +1,0 @@
-<map id="yy_switch_to_buffer" name="yy_switch_to_buffer">
-<area shape="rect" id="node2" href="$vba2psm_8lex_8c.html#af81595b30c0da73f9034ffb511db6388" title="Setup the input buffer state to scan directly from a user&#45;specified character buffer. " alt="" coords="189,5,297,32"/>
-<area shape="rect" id="node3" href="$vba2psm_8lex_8c.html#a861edd3cf1c516e92631148d387d9521" title="Setup the input buffer state to scan the given bytes. " alt="" coords="345,5,449,32"/>
-<area shape="rect" id="node4" href="$vba2psm_8lex_8c.html#a1569a0938133ac9334728cb86777ab9f" title="Setup the input buffer state to scan a string. " alt="" coords="497,5,604,32"/>
-</map>
