@@ -7,12 +7,12 @@
 # Regla de compilacion de los objetos C.
 %.o : %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
-CC = g++
-CFLAGS	= -g -Wall -ansi -pedantic
+CC = gcc
+CFLAGS	= -Wall
 FLEX = C:\Dev\win_flex_bison\flex.exe
 BISON = C:\Dev\win_flex_bison\bison.exe
 
-SRCS = generators.h initVector.c tables.c doublequeu.c \
+SRCS = pscodegen.h generators.h pscodegen.c initVector.c tables.c doublequeu.c \
 		sumVectorElements.c SumQueu.c cardVectorElements.c printVectorElements.c \
 		printString.c readVectorElements.c addVectors.c
 		
@@ -20,6 +20,8 @@ OBJS = pscodegen.o initVector.o tables.o vba2psm.lex.o vba2psm.tab.o \
 		doublequeu.o sumVectorElements.o SumQueu.o cardVectorElements.o printVectorElements.o \
 		printString.o readVectorElements.o addVectors.o
 EXES = vba2psm.exe
+
+all : exes docs vba2psm.jpg
 
 tables.o : tables.c
 
@@ -58,11 +60,11 @@ main.o : main.c
 pscodegen.o:	pscodegen.h pscodegen.c
 		$(CC) $(CFLAGS) -c pscodegen.c -o pscodegen.o
 
-vba2psm.exe : pscodegen.o main.o vba2psm.tab.o vba2psm.lex.o vba2psm.a
+vba2psm.exe : main.o vba2psm.tab.o vba2psm.lex.o vba2psm.a
 	$(CC) $(CFLAGS) -o vba2psm.exe main.o vba2psm.lex.o vba2psm.tab.o pscodegen.o -L. vba2psm.a
 
 # Biblioteca de soporte del proyecto 3/27/2015 12:58:25 PM
-vba2psm.a : initVector.o tables.o doublequeu.o sumVectorElements.o \
+vba2psm.a : pscodegen.o initVector.o tables.o doublequeu.o sumVectorElements.o \
 				SumQueu.o cardVectorElements.o printVectorElements.o \
 				printString.o readVectorElements.o addVectors.o
 	ar -r vba2psm.a $?
@@ -83,5 +85,3 @@ docs : doc/index.html
 clean :
 	cmd /C "del $(OBJS) $(EXES) vba2psm.a vba2psm.tab.h vba2psm.tab.c vba2psm.lex.c main.o"
 	if exist .\doc cmd /C "rd /S /Q .\doc"
-
-all : exes docs vba2psm.jpg

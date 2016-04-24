@@ -1,5 +1,1 @@
-Module Max
-	Sub main()
-	Dim x
-	End Sub
-End Module
+5 + 5 - 4

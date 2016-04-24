@@ -1,6 +1,0 @@
-C:\Dev\win_flex_bison\bison.exe -d vba2psm.y --graph=vba2psm.gv
-g++ -g -Wall -ansi -pedantic -c -o vba2psm.tab.o vba2psm.tab.c
-C:\Dev\win_flex_bison\flex.exe -o vba2psm.lex.c vba2psm.l
-g++ -g -Wall -ansi -pedantic -c -o vba2psm.lex.o vba2psm.lex.c
-g++ -g -Wall -ansi -pedantic -o vba2psm.exe main.o vba2psm.lex.o vba2psm.tab.o pscodegen.o -L. vba2psm.a
-dot -Tjpg vba2psm.gv -o vba2psm.jpg

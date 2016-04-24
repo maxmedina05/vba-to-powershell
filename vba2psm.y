@@ -1,59 +1,27 @@
 %{
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include "generators.h"
-#include "heading.h"
+  #include "heading.h"
+  #include "generators.h"
 
-int yyerror(char *s);
-int yylex(void);
-extern int yylineno;
-extern FILE *yyout;
-int errors = 0;
-
-std::map<std::string,std::string> symbolTable;
-
-void install(char* type, char *identifier){
-  std::string idstr(identifier);
-  std::string typestr(type);
-
-  // check if identifier exist
-  if(symbolTable.find(identifier) != symbolTable.end()){
-    symbolTable[identifier] = typestr;
-  }
-  else{
-    errors++;
-    yyerror("Already defined");
-  }
-}
-
-bool contextCheck(char * identifier){
-  std::string idstr(identifier);
-  //std::string typestr(type);
-
-  // check if identifier exist
-  return (symbolTable.find(identifier) != symbolTable.end());
-}
-
+  int yylex(void);
+  extern int yylineno;
+  extern FILE *yyout;
+  int errors = 0;
 %}
 
  /* Symbols */
 %union {
-	char *s;
-	queu q;
-  char c;
-  int i;
+  queu q;
   double d;
+  struct ast *a;
+  struct symbol *s; /* which symbol */
+  struct symlist *sl;
+  int fn; /* which function */
 }
 
 /* declare tokens */
 %token <d> NUMBER
-%token <i> INTEGER
-%token <f> FLOAT
-%token <s> STRING
-%token <s> EOL
 
-	/*** VBA Tokens ***/
+  /*** VBA Tokens ***/
 %token DIM
 %token MODULE
 %token END
@@ -65,20 +33,27 @@ bool contextCheck(char * identifier){
 %token AS
 %token <s> IDENTIFIER
 %token DATATYPE
+%token <fn> FUNC
+%token EOL
+%token IF THEN ELSE WHILE DO LET
+%nonassoc <fn> CMP
 
-%left MINUS PLUS EQUAL
-%left	AST SLASH
-%type <s> expression
-%type <s> statement
+%right EQUAL
+%left MINUS PLUS
+%left AST SLASH
+%type <a> expression expression_list statement statement_list
+%type <sl> symbol_list
 %type <q> numberlist
 
+%start input
 %%
-
-input :		/*		empty		*/
-| module_declaration
+input :   /*    empty   */
 | input module_declaration
-| subroutine_definition
 | input subroutine_definition
+| input statement_list {
+    printf("= %4.4g\n> ", eval($2));
+    treefree($2);  
+}
 ;
 
 module_declaration: /* Nothing */
@@ -96,50 +71,43 @@ function_definition: /* Nothing */
 | FUNCTION IDENTIFIER '(' argument ')' statement_list END FUNCTION
 ;
 
-statement_list: /* Empty */
-| statement
-| statement_list statement
-;
-
-statement : expression {$$ = $1;}
+statement : IF expression THEN statement_list {
+  $$ = newflow('I', $2, $4, NULL);
+  }
+| IF expression THEN statement_list ELSE statement_list {
+  $$ = newflow('I', $2, $4, $6); 
+  }
+| WHILE expression DO statement_list {$$ = newflow('W', $2, $4, NULL); }
 | variable_declaration
+| expression
 ;
 
-variable_declaration: DIM IDENTIFIER EQUAL numberlist {
-  //std::string idstr($2);
-  if(contextCheck($2)) {
-    initArray(yyout, 0, $2, $4);
-  }
-  else {
-    initArray(yyout, 0, $2, $4);
-  }
+statement_list: /* Nothing */ {$$ = NULL;}
+| statement statement_list {
+  if($2 == NULL) $$ = $1;
+  else $$ = newast('L', $1, $2);
 }
-| DIM IDENTIFIER EQUAL expression {
-  //install("Generic", $2);
-}
-| DIM IDENTIFIER { 
-	{ 
-    //sprintf($$, "%s", $2);
-    //install("Generic", $2);
-   }
-}
+;
+
+variable_declaration: DIM IDENTIFIER EQUAL numberlist
+| DIM IDENTIFIER EQUAL expression
+| DIM IDENTIFIER
 ;
 
 numberlist : NUMBER { $$= appendQueu(newQueu(), $1); }
 | numberlist NUMBER { $$= appendQueu($1, $2); }
 ;
 
-expression: NUMBER {
-	char *str = (char*)malloc( 11*sizeof(double));
-  $$ = itoa($1, str, 10);}
-|	expression PLUS expression { 
-	$$ = (char*)stringBuilder(3, $1, "+", $3).c_str(); free($1); free($3);}
-|	expression MINUS expression { 
-	$$ = (char*)stringBuilder(3, $1, "-", $3).c_str(); free($1); free($3);}
-|	expression AST expression { 
-	$$ = (char*)stringBuilder(3, $1, "*", $3).c_str(); free($1); free($3);}
-|	expression SLASH expression { 
-	$$ = (char*)stringBuilder(3, $1, "/", $3).c_str(); free($1); free($3);}
+expression: expression PLUS expression { $$ = newast('+', $1, $3); }
+| expression MINUS expression { $$ = newast('-', $1, $3); }
+| expression AST expression { $$ = newast('*', $1, $3); }
+| expression SLASH expression { $$ = newast('/', $1, $3); }
+| '(' expression ')' { $$ = $2;}
+| NUMBER { $$ = newnum($1);}
+| IDENTIFIER { $$ = newref($1); }
+| IDENTIFIER EQUAL expression { $$ = newasgn($1, $3); }
+| FUNC '(' expression_list ')' { $$ = newfunc($1, $3); }
+| IDENTIFIER '(' expression_list ')' { $$ = newcall($1, $3); }
 ;
 
 argument: /* Nothing */
@@ -149,34 +117,17 @@ argument: /* Nothing */
 | IDENTIFIER EQUAL expression
 | IDENTIFIER
 ;
-%start input
+
+argument_list: /* nothing */
+| argument_list argument
+;
+
+expression_list: expression
+| expression ',' expression_list { $$ = newast('L', $1, $3); }
+;
+
+symbol_list: IDENTIFIER { $$ = newsymlist($1, NULL); }
+| IDENTIFIER ',' symbol_list { $$ = newsymlist($1, $3); }
 ;
 
 %%
-int yyerror(std::string s)
-{
-  errors++;
-  extern int line_num;	// defined and maintained in lex.c
-  extern char *yytext;	// defined and maintained in lex.c
-  
-  std::cerr << "ERROR: " << s << " at symbol \"" << yytext;
-  std::cerr << "\" on line " << line_num << std::endl;
-  exit(1);
-}
-
-int yyerror(char *s)
-{
-  return yyerror(std::string(s));
-}
-
-void yyerror(char *s, ...)
-{
-  errors++;
-	extern int line_num;	// defined and maintained in lex.c
-  va_list ap;
-  va_start(ap, s);
-
-  fprintf(stderr, "%d: error: ", line_num);
-  vfprintf(stderr, s, ap);
-  fprintf(stderr, "\n");
-}

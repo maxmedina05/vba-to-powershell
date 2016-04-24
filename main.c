@@ -67,3 +67,12 @@ int main(int argc, char *argv[]) {
 
 	return EXIT_SUCCESS;
 }
+
+void yyerror(char *s, ...)
+{
+    va_list ap;
+    va_start(ap, s);
+    fprintf(stderr, "%d: error: ", yylineno);
+    vfprintf(stderr, s, ap);
+    fprintf(stderr, "\n");
+}
