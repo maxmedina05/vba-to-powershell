@@ -21,7 +21,9 @@ OBJS = pscodegen.o initVector.o tables.o vba2psm.lex.o vba2psm.tab.o \
 		printString.o readVectorElements.o addVectors.o
 EXES = vba2psm.exe
 
-all : exes docs vba2psm.jpg
+all : exes
+
+full: all docs vba2psm.jpg
 
 tables.o : tables.c
 

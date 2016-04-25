@@ -62,6 +62,23 @@ newnum(double d)
     a->number = d;
     return (struct ast *)a;
 }
+
+struct ast *
+newstring(char *s)
+{
+    int len = strlen(s);
+    struct strval *a = malloc(sizeof(struct strval));
+    if(!a)
+    {
+        yyerror("out of space");
+        exit(0);
+    }
+    a->nodetype = TYPE_STRING;
+    a->string = (char*)malloc(sizeof(char*)*len+1);
+    strcpy(a->string, s);
+    return (struct ast *)a;
+}
+
 struct ast *
 newcmp(int cmptype, struct ast *l, struct ast *r)
 {
@@ -186,6 +203,19 @@ treefree(struct ast *a)
         if( ((struct flow *)a)->tl) treefree( ((struct flow *)a)->tl);
         if( ((struct flow *)a)->el) treefree( ((struct flow *)a)->el);
         break;
+    case 'D':
+        free(((struct declaration*)a)->exp);
+    break;
+    case CASE_EXPRESSION:
+        if(((struct casecon *)a)->exp) treefree( ((struct casecon *)a)->exp);
+        if( ((struct casecon *)a)->stmts) treefree( ((struct casecon *)a)->stmts);        
+        break;
+    case SELECT_CASE:
+        if(((struct selcase *)a)->caseexp) treefree( ((struct selcase *)a)->caseexp);
+        break;
+    case TYPE_STRING:
+        free(((struct strval *)a)->string);
+    break;
     default:
         fprintf(stderr, "internal error: free bad node %c\n", a->nodetype);
     }
@@ -243,6 +273,7 @@ eval(struct ast *a)
     case '=':
         v = ((struct symasgn *)a)->s->value =
                 eval(((struct symasgn *)a)->v);
+
         break;
     /* expressions */
     case '+':
@@ -328,6 +359,8 @@ eval(struct ast *a)
         break;
     case 'C':
         v = calluser((struct ufncall *)a);
+        break;
+    case 'D':
         break;
     default:
         fprintf(stderr, "internal error: bad node %c\n", a->nodetype);
@@ -437,4 +470,219 @@ calluser(struct ufncall *f)
     }
     free(oldval);
     return v;
+}
+
+struct ast *newDecl(int nodetype, int dt, struct symbol *s, struct ast *e){
+    struct declaration *a = malloc(sizeof(struct declaration));
+    if(!a)
+    {
+        yyerror("out of space");
+        exit(0);
+    }
+    a->nodetype = nodetype;
+    a->type = dt;
+    a->var = s;
+    a->exp = e;
+    return (struct ast *)a;    
+}
+
+double genCode(struct ast *a, FILE* fout)
+{
+    double v = 0;
+    if(!a)
+    {
+        yyerror("internal error, null eval");
+        return 0;
+    }
+    switch(a->nodetype)
+    {
+    /* constant */
+    case 'K':
+        v = ((struct numval *)a)->number;
+        fprintf(fout, "%d ", (int)v);
+        break;
+    /* name reference */
+    case 'N':
+        v = ((struct symref *)a)->s->value;
+        fprintf(fout, "$%s ", ((struct symref *)a)->s->name);
+        break;
+    /* declaration */
+    case 'D':
+        //fprintf(fout, "$%s ", ((struct declaration *)a)->var->name);
+        printDeclaractionStmt(fout, a);
+        break;
+    /* assignment */
+    case '=':
+        //v = ((struct symasgn *)a)->s->value = eval(((struct symasgn *)a)->v);
+        fprintf(fout, "$%s = ", ((struct symasgn *)a)->s->name);
+        genCode(((struct symasgn *)a)->v, fout);
+        break;
+    /* expressions */
+    case '+':
+        //v = eval(a->l) + eval(a->r);
+        genCode(a->l, fout);
+        fprintf(fout, "+ ");
+        genCode(a->r, fout);
+        break;
+    case '-':
+        //v = eval(a->l) - eval(a->r);
+        genCode(a->l, fout);
+        fprintf(fout, "- ");
+        genCode(a->r, fout);
+        break;
+    case '*':
+        //v = eval(a->l) * eval(a->r);
+        genCode(a->l, fout);
+        fprintf(fout, "* ");
+        genCode(a->r, fout);
+        break;
+    case '/':
+        //v = eval(a->l) / eval(a->r);
+        genCode(a->l, fout);
+        fprintf(fout, "/ ");
+        genCode(a->r, fout);
+        break;
+    case '|':
+        //v = fabs(eval(a->l));
+        break;
+    case 'M':
+        //v = -eval(a->l);
+        break;
+    /* comparisons */
+        /*
+            ">"  := 1 
+            "<"  := 2 
+            "<>" := 3
+            "==" := 4
+            ">=" := 5
+            "<=" := 6
+         */
+    case '1':
+        //v = (eval(a->l) > eval(a->r)) ? 1 : 0;
+        genCode(a->l, fout);
+        fprintf(fout, "-gt ");
+        genCode(a->r, fout);
+        break;
+    case '2':
+        //v = (eval(a->l) < eval(a->r)) ? 1 : 0;
+        genCode(a->l, fout);
+        fprintf(fout, "-lt ");
+        genCode(a->r, fout);
+        break;
+    case '3':
+        //v = (eval(a->l) != eval(a->r)) ? 1 : 0;
+        genCode(a->l, fout);
+        fprintf(fout, "-ne ");
+        genCode(a->r, fout);
+        break;
+    case '4':
+        //v = (eval(a->l) == eval(a->r)) ? 1 : 0;
+        genCode(a->l, fout);
+        fprintf(fout, "-eq ");
+        genCode(a->r, fout);
+        break;
+    case '5':
+        //v = (eval(a->l) >= eval(a->r)) ? 1 : 0;
+        genCode(a->l, fout);
+        fprintf(fout, "-ge ");
+        genCode(a->r, fout);
+        break;
+    case '6':
+        //v = (eval(a->l) <= eval(a->r)) ? 1 : 0;
+        genCode(a->l, fout);
+        fprintf(fout, "-le ");
+        genCode(a->r, fout);
+        break;
+    /* control flow */
+    /* null expressions allowed in the grammar, so check for them */
+    /* if/then/else */
+    case 'I':
+        fprintf(fout, "If (");
+        genCode(((struct flow *)a)->cond, fout);
+        fprintf(fout, ") {\n");
+        genCode(((struct flow *)a)->tl, fout);
+        fprintf(fout, "\n }\n");
+
+        if(((struct flow *)a)->el){
+            fprintf(fout, "Else {\n");
+            genCode(((struct flow *)a)->el, fout);
+            fprintf(fout, "\n }\n");
+        }
+        break;
+    /* while/do */
+    case 'W':
+        fprintf(fout, "while (");
+        genCode(((struct flow *)a)->cond, fout);
+        fprintf(fout, ") {\n");
+        genCode(((struct flow *)a)->tl, fout);
+        fprintf(fout, "\n }\n");
+        break; /* value of last statement is value of while/do */
+    /* list of statements */
+    case 'L':
+        genCode(a->l, fout);
+        genCode(a->r, fout);
+        break;
+    case 'F':
+       // v = callbuiltin((struct fncall *)a);
+        break;
+    case 'C':
+        //v = calluser((struct ufncall *)a);
+        break;
+
+    case SELECT_CASE:
+        fprintf(stderr, "SELECT CASE\n");
+    break;
+
+    case CASE_EXPRESSION:
+         fprintf(stderr, "CASE_EXPRESSION\n");
+    break;
+
+    case TYPE_STRING:
+        fprintf(fout, "%s\n", ((struct strval *)a)->string);
+    break;
+
+    default:
+        fprintf(stderr, "internal error: bad node %c\n", a->nodetype);
+    }
+    return v;
+}
+
+void printDeclaractionStmt(FILE *fout, struct ast *a){
+ struct declaration * decl = ((struct declaration *)a);
+ if(decl->exp != NULL){
+    fprintf(fout, "$%s = ", decl->var->name);
+    genCode(decl->exp, fout);
+ }
+
+ else {
+   fprintf(fout, "$%s ", decl->var->name); 
+ }
+ 
+ fprintf(fout, "\n");
+}
+
+struct ast *newcase(int nodetype, struct ast *exp, struct ast *stl){
+    struct casecon *a = malloc(sizeof(struct casecon));
+    if(!a)
+    {
+        yyerror("out of space");
+        exit(0);
+    }
+    a->nodetype = nodetype;
+    a->exp = exp;
+    a->stmts = stl;
+    return (struct ast *)a;    
+}
+
+struct ast *newselcase(int nodetype, struct symbol *s, struct ast *cexps){
+    struct selcase *a = malloc(sizeof(struct selcase));
+    if(!a)
+    {
+        yyerror("out of space");
+        exit(0);
+    }
+    a->nodetype = nodetype;
+    a->s = s;
+    a->caseexp = cexps;
+    return (struct ast *)a;    
 }
