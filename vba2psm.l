@@ -41,8 +41,8 @@ ID [a-zA-Z][a-zA-Z0-9_]*
 "Function"   { return FUNCTION;}
 "Select"   { return SELECT;}
 "Case" { return CASE;}
-"Is" { return IS;}
-"To" { return TO;}
+"Is" { return IS_OPERATOR;}
+"To" { return TO_OPERATOR;}
 "if" { return IF; }
 "then" { return THEN; }
 "else" { return ELSE; }

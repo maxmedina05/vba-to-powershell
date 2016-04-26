@@ -63,6 +63,17 @@ newnum(double d)
     return (struct ast *)a;
 }
 
+struct ast *newisop(){
+    struct IsOperator *a = malloc(sizeof(struct IsOperator));
+    if(!a)
+    {
+        yyerror("out of space");
+        exit(0);
+    }
+    a->nodetype = IS_OP;
+    return (struct ast *)a;    
+}
+
 struct ast *
 newstring(char *s)
 {
@@ -120,6 +131,20 @@ newcall(struct symbol *s, struct ast *l)
     a->l = l;
     a->s = s;
     return (struct ast *)a;
+}
+
+struct ast *newvbafn(struct symbol *s, struct ast *l, struct ast *stmt){
+    struct vbafn *a = malloc(sizeof(struct vbafn));
+    if(!a)
+    {
+        yyerror("out of space");
+        exit(0);
+    }
+    a->nodetype = VBA_FUNCTION;
+    a->l = l;
+    a->s = s;
+    a->stmt = stmt;
+    return (struct ast *)a;   
 }
 
 struct ast *
@@ -182,6 +207,7 @@ treefree(struct ast *a)
     case '5':
     case '6':
     case 'L':
+    case TO_OP:
         treefree(a->r);
     /* one subtree */
     case '|':
@@ -190,6 +216,7 @@ treefree(struct ast *a)
     case 'F':
         treefree(a->l);
     /* no subtree */
+    case IS_OP:
     case 'K':
     case 'N':
         break;
@@ -215,6 +242,10 @@ treefree(struct ast *a)
         break;
     case TYPE_STRING:
         free(((struct strval *)a)->string);
+    break;
+    case VBA_FUNCTION:
+        if(((struct vbafn *)a)->l) treefree(((struct vbafn *)a)->l);
+        if(((struct vbafn *)a)->stmt) treefree(((struct vbafn *)a)->stmt);
     break;
     default:
         fprintf(stderr, "internal error: free bad node %c\n", a->nodetype);
@@ -361,7 +392,10 @@ eval(struct ast *a)
         v = calluser((struct ufncall *)a);
         break;
     case 'D':
-        break;
+    case IS_OP:
+    case TO_OP:
+    case VBA_FUNCTION:
+    break;
     default:
         fprintf(stderr, "internal error: bad node %c\n", a->nodetype);
     }
@@ -628,17 +662,44 @@ double genCode(struct ast *a, FILE* fout)
     case 'C':
         //v = calluser((struct ufncall *)a);
         break;
+    case IS_OP:
+        fprintf(fout, "$_ ");
+
+    break;
+
+    case TO_OP:
+        fprintf(fout, "$_ -In ");
+        genCode(a->l, fout);
+        fprintf(fout, "..");
+        genCode(a->r, fout);
+    break;
 
     case SELECT_CASE:
-        fprintf(stderr, "SELECT CASE\n");
+        // fprintf(stderr, "SELECT CASE\n");
+        fprintf(fout, "switch ($%s) { \n", ((struct selcase *)a)->s->name);
+        genCode(((struct selcase *)a)->caseexp, fout);
+        fprintf(fout, "}");
     break;
 
     case CASE_EXPRESSION:
-         fprintf(stderr, "CASE_EXPRESSION\n");
+         //fprintf(stderr, "CASE_EXPRESSION\n");
+        fprintf(fout, "{ ");
+        genCode(((struct casecon *)a)->exp, fout);
+        fprintf(fout, "} ");
+        fprintf(fout, "{ ");
+        genCode(((struct casecon *)a)->stmts, fout);
+        fprintf(fout, "}\n");
     break;
 
     case TYPE_STRING:
-        fprintf(fout, "%s\n", ((struct strval *)a)->string);
+        fprintf(fout, "%s ", ((struct strval *)a)->string);
+    break;
+
+    case VBA_FUNCTION:
+        //fprintf(stderr, "%s\n", "FUNCTION");
+        fprintf(fout, "function %s() {\n", ((struct vbafn *)a)->s->name );
+        genCode(((struct vbafn *)a)->stmt ,fout);
+        fprintf(fout, "\n}\n");
     break;
 
     default:

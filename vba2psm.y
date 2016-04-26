@@ -30,7 +30,7 @@
 %token FUNCTION
 %token SELECT
 %token CASE
-%token IS TO
+%token IS_OPERATOR TO_OPERATOR
 %token AS
 %token DATATYPE
 %token <t> STRING
@@ -45,6 +45,7 @@
 %left AST SLASH
 %type <a> expression expression_list statement statement_list variable_declaration
 %type <a> case_expression case_expression_list select_case_statement
+%type <a> function_definition argument_list argument
 %type <sl> symbol_list
 
 %start input
@@ -52,6 +53,10 @@
 input :   /*    empty   */
 | input module_declaration
 | input subroutine_definition
+| input function_definition {
+    genCode($2, yyout);
+    treefree($2);  
+}
 | input statement_list {
     genCode($2, yyout);
     treefree($2);  
@@ -63,12 +68,13 @@ module_declaration: MODULE IDENTIFIER subroutine_definition END MODULE
 | MODULE IDENTIFIER END MODULE
 ;
 
-subroutine_definition: SUB IDENTIFIER '(' argument ')' statement_list END SUB
+subroutine_definition: SUB IDENTIFIER '(' argument_list ')' statement_list END SUB
 | SUB IDENTIFIER END SUB
 ;
 
-function_definition: /* Nothing */
-| FUNCTION IDENTIFIER '(' argument ')' statement_list END FUNCTION
+function_definition: /* Nothing */{$$ = NULL;}
+| FUNCTION IDENTIFIER '(' argument_list ')' statement_list END FUNCTION {
+  $$ = newvbafn($2, NULL, $6);}
 ;
 
 statement_list: /* Nothing */ {$$ = NULL;}
@@ -118,6 +124,8 @@ expression: expression CMP expression {$$ = newcmp($2, $1, $3);}
 | expression MINUS expression { $$ = newast('-', $1, $3); }
 | expression AST expression { $$ = newast('*', $1, $3); }
 | expression SLASH expression { $$ = newast('/', $1, $3); }
+| IS_OPERATOR CMP expression {$$ = newcmp($2, newisop(), $3);}
+| expression TO_OPERATOR expression { $$ = newast(TO_OP, $1, $3);}
 | '(' expression ')' { $$ = $2;}
 | NUMBER { $$ = newnum($1);}
 | IDENTIFIER { $$ = newref($1);}
@@ -136,7 +144,7 @@ argument: /* Nothing */
 ;
 
 argument_list: /* nothing */
-| argument_list argument
+| argument_list ',' argument
 ;
 
 expression_list: expression

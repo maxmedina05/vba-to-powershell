@@ -6,7 +6,10 @@
 enum NodeTypes{
     CASE_EXPRESSION = 1001,
     SELECT_CASE,
-    TYPE_STRING
+    TYPE_STRING,
+    IS_OP,
+    TO_OP,
+    VBA_FUNCTION
 };
 
 /* symbol table */
@@ -75,6 +78,14 @@ struct ufncall   /* user function */
     struct symbol *s;
 };
 
+struct vbafn   /* user vba function */
+{
+    int nodetype; /* type VBA_FUNCTION */
+    struct ast *l; /* list of arguments */
+    struct symbol *s;
+    struct ast *stmt; /*list of statements*/
+};
+
 struct flow
 {
     int nodetype; /* type I or W */
@@ -111,6 +122,11 @@ struct numval
     double number;
 };
 
+struct IsOperator
+{
+    int nodetype; /* type IS_OPERATOR */
+};
+
 struct strval
 {
     int nodetype; /* type STRING */
@@ -136,11 +152,14 @@ struct ast *newcall(struct symbol *s, struct ast *l);
 struct ast *newref(struct symbol *s);
 struct ast *newasgn(struct symbol *s, struct ast *v);
 struct ast *newnum(double d);
+struct ast *newisop();
 struct ast *newstring(char* s);
 struct ast *newflow(int nodetype, struct ast *cond, struct ast *tl, struct ast *tr);
 struct ast *newDecl(int nodetype, int dt, struct symbol *name, struct ast *e);
 struct ast *newcase(int nodetype, struct ast *exp, struct ast *stl);
 struct ast *newselcase(int nodetype, struct symbol *s, struct ast *cexps);
+struct ast *newvbafn(struct symbol *s, struct ast *l, struct ast *stmt);
+
 /* define a function */
 void dodef(struct symbol *name, struct symlist *syms, struct ast *stmts);
 /* evaluate an AST */
