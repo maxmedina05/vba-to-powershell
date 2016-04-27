@@ -35,6 +35,7 @@ ID [a-zA-Z][a-zA-Z0-9_]*
 "<=" { yylval.fn = 6; return CMP; }
 		/* keywords */
 "Module"	{ return MODULE;}
+"Public" {return PUBLIC;}
 "Sub"   { return SUB;}
 "End"		{ return END;}
 "Dim"   { return DIM;}
@@ -43,11 +44,17 @@ ID [a-zA-Z][a-zA-Z0-9_]*
 "Case" { return CASE;}
 "Is" { return IS_OPERATOR;}
 "To" { return TO_OPERATOR;}
+"As" {return AS;}
+"Integer" {return INTEGER;}
+"String" {return TSTRING;}
+"Double" {return DOUBLE;}
 "if" { return IF; }
 "then" { return THEN; }
-"else" { return ELSE; }
+"else"|"Else" { return ELSE; }
 "while" { return WHILE; }
 "do" { return DO; }
+"Attribute" {return ATTRIBUTE;}
+"VB_Name" {return VB_NAME;}
 \"(\\.|\"\"|[^"\n])*\" { yylval.t= yytext; return STRING; }
 	/* names */
 {ID}  {yylval.s = lookup(yytext); return IDENTIFIER;}

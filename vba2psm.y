@@ -17,6 +17,7 @@
   struct symbol *s; /* which symbol */
   struct symlist *sl;
   int fn; /* which function */
+  int i;
 }
 
 /* declare tokens */
@@ -27,16 +28,16 @@
 %token MODULE
 %token END
 %token SUB
-%token FUNCTION
+%token FUNCTION ATTRIBUTE VB_NAME
 %token SELECT
 %token CASE
 %token IS_OPERATOR TO_OPERATOR
 %token AS
-%token DATATYPE
+%token INTEGER TSTRING DOUBLE
 %token <t> STRING
 %token <s> IDENTIFIER
 %token <fn> FUNC
-%token EOL
+%token EOL PUBLIC
 %token IF THEN ELSE WHILE DO LET
 %nonassoc <fn> CMP
 
@@ -47,6 +48,7 @@
 %type <a> case_expression case_expression_list select_case_statement
 %type <a> function_definition argument_list argument
 %type <sl> symbol_list
+%type <i> data_type
 
 %start input
 %%
@@ -68,13 +70,15 @@ module_declaration: MODULE IDENTIFIER subroutine_definition END MODULE
 | MODULE IDENTIFIER END MODULE
 ;
 
-subroutine_definition: SUB IDENTIFIER '(' argument_list ')' statement_list END SUB
+subroutine_definition: SUB IDENTIFIER '(' argument ')' statement_list END SUB
 | SUB IDENTIFIER END SUB
 ;
 
-function_definition: /* Nothing */{$$ = NULL;}
-| FUNCTION IDENTIFIER '(' argument_list ')' statement_list END FUNCTION {
-  $$ = newvbafn($2, NULL, $6);}
+function_definition:    /* Nothing */ 
+| PUBLIC FUNCTION IDENTIFIER '(' ')' statement_list END FUNCTION {$$ = newvbafn($3, NULL, $6);}
+| PUBLIC FUNCTION IDENTIFIER '(' argument ')' statement_list END FUNCTION {$$ = newvbafn($3, $5, $7);}
+| FUNCTION IDENTIFIER '(' ')' statement_list END FUNCTION {$$ = newvbafn($2, NULL, $5);}
+| FUNCTION IDENTIFIER '(' argument ')' statement_list END FUNCTION {$$ = newvbafn($2, $4, $6);}
 ;
 
 statement_list: /* Nothing */ {$$ = NULL;}
@@ -94,6 +98,7 @@ statement: IF expression THEN statement_list {
 | select_case_statement
 | variable_declaration
 | expression
+| ATTRIBUTE VB_NAME EQUAL STRING
 ;
 
 select_case_statement: SELECT CASE IDENTIFIER case_expression_list END SELECT {
@@ -112,11 +117,18 @@ case_expression_list: /* nothing */ {$$ = NULL;}
 case_expression: CASE expression statement_list {
     $$ = newcase(CASE_EXPRESSION, $2, $3);
 }
+| CASE ELSE statement_list
 ;
 
-variable_declaration: DIM IDENTIFIER EQUAL expression {
-  $$ = newDecl('D', 0, $2, $4); }
+variable_declaration: DIM IDENTIFIER AS data_type EQUAL expression {$$ = newDecl('D', $4, $2, $6); }
+| DIM IDENTIFIER EQUAL expression {$$ = newDecl('D', 0, $2, $4); }
+| DIM IDENTIFIER AS data_type {$$ = newDecl('D', $4, $2, NULL);}
 | DIM IDENTIFIER {$$ = newDecl('D', 0, $2, NULL);}
+;
+
+data_type: INTEGER {$$ = TYPE_INTEGER;}
+| DOUBLE  {$$ = TYPE_DOUBLE;}
+| TSTRING  {$$ = TYPE_STRING;}
 ;
 
 expression: expression CMP expression {$$ = newcmp($2, $1, $3);}
@@ -135,16 +147,16 @@ expression: expression CMP expression {$$ = newcmp($2, $1, $3);}
 | STRING {$$ = newstring($1); }
 ;
 
-argument: /* Nothing */
-| DIM IDENTIFIER AS DATATYPE EQUAL expression
-| DIM IDENTIFIER EQUAL expression
-| DIM IDENTIFIER
-| IDENTIFIER EQUAL expression
-| IDENTIFIER
+argument: DIM IDENTIFIER AS data_type 
+| DIM IDENTIFIER {$$ = newDecl('A', 0, $2, NULL);}
+| IDENTIFIER { $$ = newDecl('A', 0, $1, NULL);}
 ;
 
-argument_list: /* nothing */
-| argument_list ',' argument
+argument_list: /* nothing */ { $$ = newDecl('A', 0, "", NULL);}
+| argument ',' argument_list {
+    if($3 == NULL) $$ = $1;
+    else $$ = newast(ARGUMENT_LIST, $1, $3);
+  }
 ;
 
 expression_list: expression

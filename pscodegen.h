@@ -7,9 +7,12 @@ enum NodeTypes{
     CASE_EXPRESSION = 1001,
     SELECT_CASE,
     TYPE_STRING,
+    TYPE_INTEGER,
+    TYPE_DOUBLE,
     IS_OP,
     TO_OP,
-    VBA_FUNCTION
+    VBA_FUNCTION,
+    ARGUMENT_LIST
 };
 
 /* symbol table */
@@ -48,6 +51,7 @@ void symlistfree(struct symlist *sl);
 * F built in function call
 * C user function call
 * D declaration
+* A Argment
 */
 
 enum bifs   /* built-in functions */
@@ -168,5 +172,7 @@ double eval(struct ast *);
 void treefree(struct ast *);
 
 void printDeclaractionStmt(FILE *fout, struct ast *);
+char *getTypeName(int datatype);
+double genCode(struct ast *a, FILE* fout);
 
 #endif //_PSCODEGEN_H

@@ -206,6 +206,7 @@ treefree(struct ast *a)
     case '4':
     case '5':
     case '6':
+    ARGUMENT_LIST:
     case 'L':
     case TO_OP:
         treefree(a->r);
@@ -230,8 +231,9 @@ treefree(struct ast *a)
         if( ((struct flow *)a)->tl) treefree( ((struct flow *)a)->tl);
         if( ((struct flow *)a)->el) treefree( ((struct flow *)a)->el);
         break;
+    case 'A':
     case 'D':
-        free(((struct declaration*)a)->exp);
+        if(((struct declaration*)a)->exp) free(((struct declaration*)a)->exp);
     break;
     case CASE_EXPRESSION:
         if(((struct casecon *)a)->exp) treefree( ((struct casecon *)a)->exp);
@@ -381,6 +383,7 @@ eval(struct ast *a)
         }
         break; /* value of last statement is value of while/do */
     /* list of statements */
+    case ARGUMENT_LIST:
     case 'L':
         eval(a->l);
         v = eval(a->r);
@@ -391,6 +394,7 @@ eval(struct ast *a)
     case 'C':
         v = calluser((struct ufncall *)a);
         break;
+    case 'A':
     case 'D':
     case IS_OP:
     case TO_OP:
@@ -410,11 +414,12 @@ callbuiltin(struct fncall *f)
     switch(functype)
     {
     case B_sqrt:
-        return sqrt(v);
+       // return sqrt(v);
     case B_exp:
-        return exp(v);
+        //return exp(v);
     case B_log:
-        return log(v);
+        //return log(v);
+        break;
     case B_print:
         fprintf(stderr, "= %4.4g\n", v);
         return v;
@@ -522,6 +527,7 @@ struct ast *newDecl(int nodetype, int dt, struct symbol *s, struct ast *e){
 
 double genCode(struct ast *a, FILE* fout)
 {
+    //fprintf(stderr, "Nodetype: %d\n", a->nodetype);
     double v = 0;
     if(!a)
     {
@@ -540,6 +546,9 @@ double genCode(struct ast *a, FILE* fout)
         v = ((struct symref *)a)->s->value;
         fprintf(fout, "$%s ", ((struct symref *)a)->s->name);
         break;
+    case 'A':
+        fprintf(fout, "$%s ", ((struct declaration *)a)->var->name);
+    break;
     /* declaration */
     case 'D':
         //fprintf(fout, "$%s ", ((struct declaration *)a)->var->name);
@@ -652,6 +661,11 @@ double genCode(struct ast *a, FILE* fout)
         fprintf(fout, "\n }\n");
         break; /* value of last statement is value of while/do */
     /* list of statements */
+    case ARGUMENT_LIST:
+    genCode(a->l, fout);
+    fprintf(fout, ",");
+    genCode(a->r, fout);
+    break;
     case 'L':
         genCode(a->l, fout);
         genCode(a->r, fout);
@@ -697,8 +711,12 @@ double genCode(struct ast *a, FILE* fout)
 
     case VBA_FUNCTION:
         //fprintf(stderr, "%s\n", "FUNCTION");
-        fprintf(fout, "function %s() {\n", ((struct vbafn *)a)->s->name );
-        genCode(((struct vbafn *)a)->stmt ,fout);
+        fprintf(fout, "function %s( ", ((struct vbafn *)a)->s->name );
+        if(((struct vbafn *)a)->l) genCode(((struct vbafn *)a)->l ,fout);
+        fprintf(fout, ") { \n");
+        if(((struct vbafn *)a)->stmt) genCode(((struct vbafn *)a)->stmt ,fout);
+
+        fprintf(fout, "\nreturn $%s", ((struct vbafn *)a)->s->name);
         fprintf(fout, "\n}\n");
     break;
 
@@ -710,16 +728,23 @@ double genCode(struct ast *a, FILE* fout)
 
 void printDeclaractionStmt(FILE *fout, struct ast *a){
  struct declaration * decl = ((struct declaration *)a);
+ 
+ fprintf(fout, "%s$%s ",getTypeName(decl->type), decl->var->name); 
  if(decl->exp != NULL){
-    fprintf(fout, "$%s = ", decl->var->name);
+    fprintf(fout, "= ");
     genCode(decl->exp, fout);
  }
+}
 
- else {
-   fprintf(fout, "$%s ", decl->var->name); 
- }
- 
- fprintf(fout, "\n");
+char *getTypeName(int datatype){
+    switch(datatype){
+        case TYPE_INTEGER: return "[int]";
+        case TYPE_DOUBLE: return "[Double]";
+        case TYPE_STRING: return "[String]";                
+        default: return "";
+    }
+    
+    return "";
 }
 
 struct ast *newcase(int nodetype, struct ast *exp, struct ast *stl){
